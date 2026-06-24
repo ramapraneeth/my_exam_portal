@@ -1,0 +1,36 @@
+{% extends 'exams/base.html' %}
+{% block title %}Result - {{ attempt.test.title }}{% endblock %}
+
+{% block content %}
+<div class="result-page">
+    <h2>{{ attempt.test.title }} - Result</h2>
+
+    <div class="result-summary">
+        <div class="result-score">{{ attempt.score }} / {{ attempt.total_marks }}</div>
+        <p>Status: {{ attempt.get_status_display }}</p>
+        <p>Correct: {{ attempt.correct_count }} &middot; Wrong: {{ attempt.wrong_count }} &middot; Unanswered: {{ attempt.unanswered_count }}</p>
+    </div>
+
+    <h3>Section-wise Breakdown</h3>
+    <table class="result-breakdown-table">
+        <thead>
+            <tr><th>Subject</th><th>Total</th><th>Correct</th><th>Wrong</th><th>Unanswered</th></tr>
+        </thead>
+        <tbody>
+            {% for s in section_breakdown %}
+            <tr>
+                <td>{{ s.subject }}</td>
+                <td>{{ s.total }}</td>
+                <td>{{ s.correct }}</td>
+                <td>{{ s.wrong }}</td>
+                <td>{{ s.unanswered }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p style="margin-top: 24px;">
+        <a href="{% url 'test_list' %}" class="btn-start">Back to Tests</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'exams/base.html' %}
+{% block title %}Instructions - {{ test.title }}{% endblock %}
+
+{% block content %}
+<div class="instructions-page">
+    <h2>{{ test.title }}</h2>
+    <div class="instructions-box">
+        {% if test.instructions %}
+            {{ test.instructions|linebreaks }}
+        {% else %}
+            <ul>
+                <li>The test duration is {{ test.duration_minutes }} minutes.</li>
+                <li>The clock will be set at the server. A countdown timer will display the time remaining.</li>
+                <li>Click "Save & Next" to save your answer for the current question and move to the next.</li>
+                <li>Click "Mark for Review & Next" to mark a question for review.</li>
+                <li>The test will auto-submit when the time expires.</li>
+            </ul>
+        {% endif %}
+    </div>
+    <form method="get" action="{% url 'start_test' test.id %}">
+        <label class="agree-row">
+            <input type="checkbox" required> I have read and understood the instructions.
+        </label>
+        <button type="submit" class="btn-start">I am ready to begin</button>
+    </form>
+</div>
+{% endblock %}

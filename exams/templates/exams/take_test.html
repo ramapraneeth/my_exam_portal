@@ -1,0 +1,137 @@
+{% extends 'exams/base.html' %}
+{% load static %}
+{% block title %}{{ test.title }} - In Progress{% endblock %}
+
+{% block content %}
+<div class="exam-page">
+
+    <!-- Top bar -->
+    <div class="exam-topbar">
+        <div class="exam-topbar-left">
+            <span class="exam-title-pill">{{ test.title }} <span class="info-icon" title="{{ test.instructions }}">&#9432;</span></span>
+        </div>
+        <div class="exam-topbar-right">
+            <span class="topbar-btn">&#9744; Question Paper</span>
+            <span class="topbar-btn">&#9432; Instructions</span>
+        </div>
+    </div>
+
+    <div class="exam-body">
+        <!-- Main column -->
+        <div class="exam-main">
+
+            <!-- Section tabs -->
+            <div class="section-tabs">
+                {% for section in sections %}
+                <button class="section-tab {% if forloop.first %}active{% endif %}"
+                        data-section-id="{{ section.id }}">
+                    {{ section.subject.name }} <span class="info-icon">&#9432;</span>
+                </button>
+                {% endfor %}
+                <span class="timer-display">Time Left :<span id="timer">--:--:--</span></span>
+            </div>
+
+            <div class="section-hint">Click on any subject/section to answer the questions</div>
+
+            <div class="question-type-row">Question Type :<span id="question-type">MCQ</span></div>
+
+            <!-- Question display -->
+            <div class="question-box">
+                <div class="question-header">
+                    <span>Question No. <span id="question-number">-</span></span>
+                </div>
+                <div class="question-text" id="question-text">Loading...</div>
+                <div class="choices-list" id="choices-list"></div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="action-bar">
+                <button class="btn-action btn-mark" id="btn-mark-review">Mark for Review &amp; Next</button>
+                <button class="btn-action btn-clear" id="btn-clear">Clear Response</button>
+                <div class="action-bar-right">
+                    <button class="btn-action btn-save" id="btn-save-next">Save &amp; Next</button>
+                    <button class="btn-action btn-submit" id="btn-submit">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="exam-sidebar">
+            <div class="candidate-box">
+                <div class="candidate-photo">
+                    {% if candidate_profile and candidate_profile.photo %}
+                        <img src="{{ candidate_profile.photo.url }}" alt="Candidate Photo">
+                    {% else %}
+                        <svg viewBox="0 0 24 24" width="40" height="40" fill="#bbb"><path d="M12 12c2.7 0 8 1.34 8 4v2H4v-2c0-2.66 5.3-4 8-4zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+                        <div class="photo-caption-sm">Your photograph appears<br>here during Exam</div>
+                    {% endif %}
+                </div>
+                <div class="candidate-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+            </div>
+
+            <div class="legend-grid">
+                <div class="legend-item"><span class="legend-box legend-notvisited"></span> <span id="count-not-visited">0</span> Not Visited</div>
+                <div class="legend-item"><span class="legend-box legend-notanswered"></span> <span id="count-not-answered">0</span> Not Answered</div>
+                <div class="legend-item"><span class="legend-box legend-answered"></span> <span id="count-answered">0</span> Answered</div>
+                <div class="legend-item"><span class="legend-box legend-marked"></span> <span id="count-marked">0</span> Marked for Review</div>
+                <div class="legend-item legend-item-wide">
+                    <span class="legend-box legend-answered-marked"></span>
+                    <span id="count-answered-marked">0</span> Answered &amp; Marked for Review (will be considered for evaluation)
+                </div>
+            </div>
+
+            <div class="palette-section-title" id="palette-subject-title">Mathematics</div>
+            <div class="palette-label">Choose a Question</div>
+            <div class="palette-grid" id="palette-grid"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Submit confirmation modal -->
+<div class="modal-overlay" id="submit-modal">
+    <div class="modal-box">
+        <h3>Submit Test?</h3>
+        <p>Are you sure you want to submit the test? You cannot change your answers after submission.</p>
+        <div class="modal-actions">
+            <button class="btn-action btn-clear" id="modal-cancel">Cancel</button>
+            <button class="btn-action btn-submit" id="modal-confirm">Yes, Submit</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.EXAM_CONFIG = {
+        attemptId: {{ attempt.id|default:"null" }},
+        timeLeftSeconds: {{ time_left_seconds|default:0 }},
+        sections: [
+            {% for section in sections %}
+            {
+                id: {{ section.id }},
+                subject: "{{ section.subject.name|escapejs }}",
+                questions: [
+                    {% for q in section.questions.all %}
+                    { 
+                        id: {{ q.id }}, 
+                        order: {{ q.order }} 
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        urls: {
+            getQuestion: "/attempt/{{ attempt.id }}/question/__QID__/",
+            saveAnswer: "{% url 'save_answer' attempt.id %}",
+            palette: "{% url 'palette_status' attempt.id %}",
+            submit: "{% url 'submit_test' attempt.id %}",
+            autoSubmit: "{% url 'auto_submit_test' attempt.id %}",
+            result: "/result/{{ attempt.id }}/"
+        },
+        csrfToken: "{{ csrf_token|escapejs }}"
+    };
+</script>
+<script src="{% static 'js/exam.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'exams/base.html' %}
+{% block title %}Available Tests{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h2>Welcome, {{ request.user.first_name|default:request.user.username }}</h2>
+        <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+    </div>
+
+    <h3 class="section-title">Available Tests</h3>
+    <div class="test-grid">
+        {% for test in tests %}
+        <div class="test-card">
+            <h4>{{ test.title }}</h4>
+            <p class="test-meta">
+                Subjects: {% for s in test.subjects %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </p>
+            <p class="test-meta">Duration: {{ test.duration_minutes }} minutes &middot; {{ test.total_questions }} questions</p>
+            <a href="{% url 'test_instructions' test.id %}" class="btn-start">Start Test</a>
+        </div>
+        {% empty %}
+        <p>No tests available right now.</p>
+        {% endfor %}
+    </div>
+
+    {% if attempts %}
+    <h3 class="section-title">Your Past Attempts</h3>
+    <table class="attempts-table">
+        <thead>
+            <tr><th>Test</th><th>Status</th><th>Score</th><th>Date</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for a in attempts %}
+            <tr>
+                <td>{{ a.test.title }}</td>
+                <td>{{ a.get_status_display }}</td>
+                <td>{% if a.score is not None %}{{ a.score }} / {{ a.total_marks }}{% else %}&mdash;{% endif %}</td>
+                <td>{{ a.started_at|date:"d M Y, H:i" }}</td>
+                <td>
+                    {% if a.status == 'IN_PROGRESS' %}
+                        <a href="{% url 'take_test' a.id %}">Resume</a>
+                    {% else %}
+                        <a href="{% url 'result' a.id %}">View Result</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

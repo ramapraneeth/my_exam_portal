@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+
+# This project uses Supabase Postgres, not a local sqlite db - never commit one
+db.sqlite3
+
+# Environment variables / secrets - set these in Render's dashboard instead
+.env
+
+# Static files collected by collectstatic (regenerated on every build)
+staticfiles/
+
+# Locally-uploaded media (only used when USE_SUPABASE_STORAGE=False)
+media/candidate_photos/*
+!media/candidate_photos/.gitkeep
+
+venv/
+*.egg-info/
+.DS_Store
