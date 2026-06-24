@@ -1,6 +1,6 @@
 from django import forms
-
-
+ 
+ 
 class CandidateLoginForm(forms.Form):
     candidate_id = forms.CharField(
         max_length=30,
@@ -8,11 +8,14 @@ class CandidateLoginForm(forms.Form):
             'placeholder': '11111',
             'class': 'login-input',
             'autofocus': True,
+            'autocomplete': 'off',
         })
     )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'placeholder': '*****',
             'class': 'login-input',
+            'autocomplete': 'new-password',
         })
     )
+ 
